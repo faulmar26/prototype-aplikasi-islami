@@ -1,0 +1,57 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install dependencies
+        run: cd frontend && npm ci
+      
+      - name: Run lint
+        run: cd frontend && npm run lint
+      
+      - name: Run typecheck
+        run: cd frontend && npx tsc --noEmit
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Build Next.js
+        run: cd frontend && npm run build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Vercel
+        run: |
+          echo "Deploy frontend ke Vercel"
+          # npx vercel --prod --token $VERCEL_TOKEN
