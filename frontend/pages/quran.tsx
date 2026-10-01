@@ -1,4 +1,4 @@
-export default function Qur'anPage() {
+export default function QuranPage() {
   return (
     <div className="min-h-screen p-8">
       <h1 className="text-3xl font-bold text-purple-600 mb-6">Al-Qur'an Digital</h1>
