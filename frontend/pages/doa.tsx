@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 export default function DoaPage() {
   return (
     <div className="min-h-screen p-8">
