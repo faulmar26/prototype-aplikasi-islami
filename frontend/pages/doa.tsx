@@ -1,34 +1,34 @@
-// @ts-nocheck
+import { dailyDuas } from '../src/data/dailyDuas';
 
 export default function DoaPage() {
   return (
-    <div className="min-h-screen p-8">
-      <h1 className="text-3xl font-bold text-green-600 mb-6">Doa Harian</h1>
-      <p className="text-gray-600 mb-8">
-        Doa-harian untuk mulai dan mengakhiri hari
-      </p>
-      <div className="bg-white rounded-lg p-6 shadow-md">
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-xl font-medium text-gray-800">Doa Pagi</h2>
-            <p className="mt-2 text-gray-600">
-              Subhanallah wa bihamdihi, adada syawatirihi, rida nafsihi, wa zin Qidrahihi
-            </p>
-          </div>
-          <div>
-            <h2 className="text-xl font-medium text-gray-800">Doa Sore</h2>
-            <p className="mt-2 text-gray-600">
-              Allohumma antas salam, wa minkas salam, tabarakta ya dhal jalali wa ikram
-            </p>
-          </div>
-          <div>
-            <h2 className="text-xl font-medium text-gray-800">Doa Malam</h2>
-            <p className="mt-2 text-gray-600">
-              Allohumma qini adhabaka ya ma manna wa manna al-maw'ud
-            </p>
-          </div>
-        </div>
+    <div className="page-stack">
+      <section className="page-intro">
+        <p className="eyebrow">Dalam setiap aktivitas</p>
+        <h1>Doa harian</h1>
+        <p>Doa pilihan untuk mengawali dan mengakhiri hari dengan mengingat Allah.</p>
+      </section>
+
+      <div className="dua-list">
+        {dailyDuas.map((dua, index) => (
+          <article className="dua-card" key={dua.title}>
+            <div className="dua-heading">
+              <span className="dua-index">{String(index + 1).padStart(2, '0')}</span>
+              <h2>{dua.title}</h2>
+            </div>
+            <p className="dua-arabic" dir="rtl" lang="ar">{dua.arabic}</p>
+            <div className="dua-translation">
+              <p className="eyebrow">Transliterasi</p>
+              <p className="transliteration">{dua.transliteration}</p>
+            </div>
+            <div className="dua-translation">
+              <p className="eyebrow">Terjemahan</p>
+              <p>{dua.translation}</p>
+            </div>
+            {dua.source && <p className="dua-source">{dua.source}</p>}
+          </article>
+        ))}
       </div>
     </div>
-  )
+  );
 }
