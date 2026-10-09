@@ -1,6 +1,30 @@
+import { useState } from 'react';
+import Link from 'next/link';
 import { dailyDuas } from '../src/data/dailyDuas';
+import { useAccount } from '../src/lib/account';
 
 export default function DoaPage() {
+  const { user, profile, saveDuaReading } = useAccount();
+  const [savingDuaId, setSavingDuaId] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<{ duaId: number; message: string; error: boolean } | null>(null);
+
+  async function markDuaRead(duaId: number, duaTitle: string) {
+    setSavingDuaId(duaId);
+    setFeedback(null);
+    try {
+      await saveDuaReading({ duaId, duaTitle });
+      setFeedback({ duaId, message: 'Doa tersimpan. Misi membaca doa hari ini selesai!', error: false });
+    } catch (saveError) {
+      setFeedback({
+        duaId,
+        message: saveError instanceof Error ? saveError.message : 'Progres doa gagal disimpan.',
+        error: true,
+      });
+    } finally {
+      setSavingDuaId(null);
+    }
+  }
+
   return (
     <div className="page-stack">
       <section className="page-intro">
@@ -26,6 +50,27 @@ export default function DoaPage() {
               <p>{dua.translation}</p>
             </div>
             {dua.source && <p className="dua-source">{dua.source}</p>}
+            {user ? (
+              <button
+                className={`dua-read-button${profile?.reading?.last_dua_id === index + 1 ? ' dua-read-saved' : ''}`}
+                disabled={savingDuaId !== null}
+                onClick={() => void markDuaRead(index + 1, dua.title)}
+                type="button"
+              >
+                {savingDuaId === index + 1
+                  ? 'Menyimpan…'
+                  : profile?.reading?.last_dua_id === index + 1
+                    ? '✓ Terakhir dibaca'
+                    : 'Tandai sudah dibaca'}
+              </button>
+            ) : (
+              <Link className="dua-read-button" href="/login">Masuk untuk menyimpan bacaan</Link>
+            )}
+            {feedback?.duaId === index + 1 && (
+              <p className={feedback.error ? 'error-message' : 'success-message'} role="status">
+                {feedback.message}
+              </p>
+            )}
           </article>
         ))}
       </div>

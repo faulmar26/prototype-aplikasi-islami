@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import PrayerSchedule from '../src/components/PrayerSchedule';
+import { useAccount } from '../src/lib/account';
 
 const shortcuts = [
   {
@@ -27,15 +28,19 @@ const shortcuts = [
 ];
 
 export default function HomePage() {
+  const { user, profile, profileError } = useAccount();
   const [today, setToday] = useState('');
 
   useEffect(() => {
-    setToday(new Intl.DateTimeFormat('id-ID', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(new Date()));
+    const timer = window.setTimeout(() => {
+      setToday(new Intl.DateTimeFormat('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }).format(new Date()));
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   return (
@@ -43,7 +48,7 @@ export default function HomePage() {
       <section className="welcome-panel">
         <div>
           <p className="eyebrow">{today || '\u00a0'}</p>
-          <h1>Assalamu’alaikum</h1>
+          <h1>{user ? `Assalamu’alaikum, ${user.name}` : 'Assalamu’alaikum'}</h1>
           <p className="welcome-copy">
             Semoga hari ini dipenuhi ketenangan dan keberkahan.
           </p>
@@ -52,6 +57,68 @@ export default function HomePage() {
       </section>
 
       <PrayerSchedule compact />
+
+      {user ? (
+        <section className="progress-panel">
+          <div className="progress-heading">
+            <div>
+              <p className="eyebrow">Perjalanan ibadahmu</p>
+              <h2>Progres harian</h2>
+            </div>
+            <div className="progress-stats">
+              <div><strong>{profile?.streak.current_streak ?? '—'}</strong><span>hari beruntun</span></div>
+              <div><strong>{profile?.points ?? '—'}</strong><span>poin terkumpul</span></div>
+            </div>
+          </div>
+          {profileError && <p className="error-message" role="alert">{profileError}</p>}
+          {profile && (
+            <>
+              <div className="mission-list">
+                {profile.missions.map((mission) => (
+                  <div className="mission-row" key={mission.code}>
+                    <span className={`mission-check${mission.completed ? ' mission-check-done' : ''}`}>
+                      {mission.completed ? '✓' : '·'}
+                    </span>
+                    <span className="mission-title">{mission.title}</span>
+                    <span className="mission-reward">+{mission.rewardPoints} poin</span>
+                    <span className="mission-state">{mission.completed ? 'Selesai' : 'Belum selesai'}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="last-read-grid">
+                <Link
+                  className="last-read-card"
+                  href={profile.reading?.last_surah_number
+                    ? `/quran?surah=${profile.reading.last_surah_number}`
+                    : '/quran'}
+                >
+                  <span className="eyebrow">Bacaan Al-Qur’an terakhir</span>
+                  <strong>{profile.reading?.last_surah_name ?? 'Mulai membaca surah'}</strong>
+                  <span>
+                    {profile.reading?.last_ayah_number
+                      ? `Lanjutkan dari ayat ${profile.reading.last_ayah_number}`
+                      : 'Pilih surah yang ingin dibaca'}
+                  </span>
+                </Link>
+                <Link className="last-read-card" href="/doa">
+                  <span className="eyebrow">Doa terakhir dibaca</span>
+                  <strong>{profile.reading?.last_dua_title ?? 'Temukan doa harian'}</strong>
+                  <span>{profile.reading?.last_dua_id ? 'Buka daftar doa' : 'Pilih doa untuk dibaca'}</span>
+                </Link>
+              </div>
+            </>
+          )}
+        </section>
+      ) : (
+        <section className="progress-panel guest-progress">
+          <div>
+            <p className="eyebrow">Simpan perjalananmu</p>
+            <h2>Mulai kumpulkan progres ibadah</h2>
+            <p>Masuk untuk menyimpan bacaan terakhir, menjaga streak, dan menyelesaikan misi harian.</p>
+          </div>
+          <Link className="primary-button" href="/login">Masuk atau daftar</Link>
+        </section>
+      )}
 
       <section className="section-block">
         <div className="section-heading">

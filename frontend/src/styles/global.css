@@ -113,6 +113,48 @@ a {
   background: #eaf0e7;
 }
 
+.account-nav {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-left: 5px;
+  border-left: 1px solid #e3e9e1;
+  padding-left: 12px;
+}
+
+.account-nav-name {
+  max-width: 120px;
+  overflow: hidden;
+  color: #405b4b;
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-account-button {
+  border: 1px solid #dfe7df;
+  border-radius: 999px;
+  padding: 8px 11px;
+  color: #52685b;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.nav-account-button:hover {
+  color: var(--green-dark);
+  background: #edf3eb;
+}
+
+.global-account-error {
+  width: min(100% - 40px, 1060px);
+  margin: 12px auto 0;
+  color: #8b3932;
+  font-size: 13px;
+}
+
 .main-content {
   min-height: calc(100vh - 144px);
   padding-block: 44px 64px;
@@ -189,6 +231,151 @@ a {
   font-size: 27px;
   font-weight: 500;
   letter-spacing: -0.035em;
+}
+
+.progress-panel {
+  display: grid;
+  gap: 18px;
+  border: 1px solid #dfe8dc;
+  border-radius: 22px;
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.progress-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.progress-heading h2,
+.guest-progress h2 {
+  margin: 7px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+  font-weight: 500;
+}
+
+.progress-stats {
+  display: flex;
+  gap: 9px;
+}
+
+.progress-stats > div {
+  display: grid;
+  min-width: 91px;
+  gap: 3px;
+  border-radius: 13px;
+  padding: 10px 12px;
+  background: #eef3eb;
+  text-align: center;
+}
+
+.progress-stats strong {
+  color: #2e654e;
+  font-size: 20px;
+}
+
+.progress-stats span {
+  color: #718179;
+  font-size: 10px;
+}
+
+.mission-list {
+  display: grid;
+  border-top: 1px solid #edf0eb;
+}
+
+.mission-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #edf0eb;
+  padding: 12px 2px;
+}
+
+.mission-check {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid #dce5db;
+  border-radius: 50%;
+  color: #859087;
+  font-size: 17px;
+}
+
+.mission-check-done {
+  border-color: #d9ead8;
+  color: #27674d;
+  background: #e7f2e5;
+  font-size: 13px;
+}
+
+.mission-title {
+  color: #40594a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mission-reward,
+.mission-state {
+  color: #7a887f;
+  font-size: 11px;
+}
+
+.mission-reward {
+  color: #8d713f;
+  font-weight: 700;
+}
+
+.last-read-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.last-read-card {
+  display: grid;
+  gap: 7px;
+  border: 1px solid #e8ede6;
+  border-radius: 15px;
+  padding: 15px;
+  background: #fbfcf9;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.last-read-card:hover {
+  border-color: #bfd2bf;
+  transform: translateY(-2px);
+}
+
+.last-read-card strong {
+  color: #355844;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.last-read-card > span:last-child {
+  color: #7d8981;
+  font-size: 11px;
+}
+
+.guest-progress {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  background: linear-gradient(120deg, #fff, #f3f6ed);
+}
+
+.guest-progress p:not(.eyebrow) {
+  max-width: 530px;
+  margin: 8px 0 0;
+  color: #718179;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .shortcut-grid {
@@ -564,6 +751,42 @@ a {
   padding: 12px 2px;
 }
 
+.surah-row-button {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid #edf0eb;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.surah-row-button:hover,
+.surah-row-selected {
+  background: #f8faf6;
+}
+
+.surah-title,
+.surah-meta {
+  display: block;
+}
+
+.surah-title {
+  color: #284638;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.surah-meta {
+  margin-top: 5px;
+  color: #859087;
+  font-size: 11px;
+}
+
+.surah-open-icon {
+  color: #77907e;
+  font-size: 21px;
+}
+
 .surah-number {
   display: grid;
   width: 37px;
@@ -581,23 +804,295 @@ a {
   flex: 1;
 }
 
-.surah-details h2 {
-  margin: 0;
-  color: #284638;
-  font-size: 14px;
-}
-
-.surah-details p {
-  margin: 5px 0 0;
-  color: #859087;
-  font-size: 11px;
-}
-
 .surah-arabic {
   margin: 0 3px 0 12px;
   color: #415d4c;
   font-family: "Noto Naskh Arabic", "Times New Roman", serif;
   font-size: 23px;
+}
+
+.resume-panel,
+.reader-panel,
+.auth-card {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 10px 35px rgba(29, 57, 42, 0.035);
+}
+
+.resume-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 21px;
+}
+
+.resume-panel h2 {
+  margin: 6px 0 3px;
+  color: #315541;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 500;
+}
+
+.resume-panel p:last-child,
+.reader-header > div > p:last-child {
+  margin: 0;
+  color: #7b8980;
+  font-size: 12px;
+}
+
+.reader-panel {
+  overflow: hidden;
+  padding: 0 22px 22px;
+}
+
+.reader-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid #e9eee7;
+  padding: 22px 0 18px;
+}
+
+.reader-header h2 {
+  margin: 6px 0 5px;
+  color: #274a37;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  font-weight: 500;
+}
+
+.reader-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.reader-surah-arabic {
+  color: #315541;
+  font-family: "Noto Naskh Arabic", "Times New Roman", serif;
+  font-size: 27px;
+}
+
+.reader-close {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid #e4eae2;
+  border-radius: 50%;
+  color: #728177;
+  background: #fff;
+  cursor: pointer;
+  font-size: 23px;
+}
+
+.reader-notice {
+  margin-top: 14px;
+}
+
+.reader-notice a {
+  color: var(--green);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.ayah-list {
+  display: grid;
+}
+
+.ayah-card {
+  border-bottom: 1px solid #edf0eb;
+  padding: 22px 2px;
+}
+
+.ayah-number {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: #668070;
+  background: #eff4ed;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ayah-arabic {
+  margin: 20px 0 14px;
+  color: #203e30;
+  font-family: "Noto Naskh Arabic", "Times New Roman", serif;
+  font-size: clamp(27px, 4.2vw, 38px);
+  line-height: 2.1;
+  text-align: right;
+}
+
+.ayah-translation {
+  margin: 0;
+  color: #596c60;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.save-position-button {
+  margin-top: 13px;
+  border: 1px solid #e1e9df;
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: #637a69;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.save-position-button:hover,
+.save-position-button.position-saved {
+  border-color: #d5e5d2;
+  color: #2c694e;
+  background: #edf5eb;
+}
+
+.save-position-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.complete-surah-button {
+  display: block;
+  width: fit-content;
+  margin: 20px auto 0;
+  text-align: center;
+}
+
+.success-message {
+  margin: 12px 0;
+  border-radius: 11px;
+  padding: 10px 12px;
+  color: #2e664b;
+  background: #edf6eb;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.dua-read-button {
+  display: inline-flex;
+  justify-content: center;
+  margin-top: 16px;
+  border: 1px solid #dfe8dc;
+  border-radius: 999px;
+  padding: 9px 13px;
+  color: #45634f;
+  background: #fbfcf9;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dua-read-button:hover,
+.dua-read-saved {
+  border-color: #d5e5d2;
+  color: #2c694e;
+  background: #edf5eb;
+}
+
+.dua-read-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.auth-card {
+  width: min(100%, 470px);
+  margin-inline: auto;
+  padding: 30px;
+}
+
+.auth-emblem {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 20px;
+  place-items: center;
+  border-radius: 16px;
+  color: #fff;
+  background: var(--green);
+  font-size: 29px;
+}
+
+.auth-card h1 {
+  margin: 7px 0 8px;
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 33px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.auth-description {
+  margin: 0;
+  color: #748278;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.auth-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field .text-input {
+  padding-right: 96px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  border: 0;
+  padding: 7px;
+  color: #52725d;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.field-hint {
+  color: #87938a;
+  font-size: 11px;
+}
+
+.auth-submit {
+  width: 100%;
+  min-height: 45px;
+  text-align: center;
+}
+
+.auth-submit:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.auth-switch {
+  margin: 19px 0 0;
+  color: #7c8980;
+  font-size: 12px;
+  text-align: center;
+}
+
+.auth-switch .text-button {
+  color: #32674d;
+}
+
+.auth-card .error-message {
+  margin: 0;
 }
 
 .dua-list {
@@ -698,6 +1193,21 @@ a {
     overflow-x: auto;
   }
 
+  .account-nav {
+    flex: 0 0 auto;
+    border-left: 0;
+    margin-left: 0;
+    padding-left: 4px;
+  }
+
+  .account-nav-name {
+    max-width: 78px;
+  }
+
+  .global-account-error {
+    width: min(100% - 28px, 1060px);
+  }
+
   .nav-link {
     flex: 0 0 auto;
     padding: 8px 10px;
@@ -726,6 +1236,61 @@ a {
 
   .shortcut-card {
     min-height: 135px;
+  }
+
+  .progress-panel {
+    padding: 17px;
+  }
+
+  .progress-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .progress-stats {
+    width: 100%;
+  }
+
+  .progress-stats > div {
+    flex: 1;
+  }
+
+  .mission-row {
+    grid-template-columns: 26px minmax(0, 1fr) auto;
+    gap: 7px;
+  }
+
+  .mission-state {
+    grid-column: 2 / -1;
+  }
+
+  .last-read-grid,
+  .guest-progress {
+    grid-template-columns: 1fr;
+  }
+
+  .guest-progress .primary-button {
+    text-align: center;
+  }
+
+  .reader-panel {
+    padding-inline: 16px;
+  }
+
+  .reader-header {
+    align-items: flex-start;
+  }
+
+  .reader-surah-arabic {
+    font-size: 21px;
+  }
+
+  .reader-header-actions {
+    gap: 6px;
+  }
+
+  .auth-card {
+    padding: 23px 18px;
   }
 
   .prayer-panel-header {

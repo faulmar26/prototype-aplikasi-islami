@@ -4,9 +4,10 @@ USE islami_app;
 -- Users table
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
+    username VARCHAR(32) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NULL,
     name VARCHAR(255),
-    password VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     default_location VARCHAR(100),
     calculation_method VARCHAR(50) DEFAULT 'Muslim World League',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -76,6 +77,7 @@ CREATE TABLE doa (
 -- Mission table
 CREATE TABLE missions (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(50) UNIQUE NOT NULL,
     title VARCHAR(100) NOT NULL,
     type VARCHAR(50),
     target_count INT NOT NULL,
@@ -92,7 +94,20 @@ CREATE TABLE user_mission_progress (
     is_completed BOOLEAN DEFAULT FALSE,
     progress_date DATE DEFAULT (CURRENT_DATE),
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (mission_id) REFERENCES missions(id)
+    FOREIGN KEY (mission_id) REFERENCES missions(id),
+    UNIQUE KEY uq_user_mission_day (user_id, mission_id, progress_date)
+);
+
+-- Last-read Quran and dua position for each account
+CREATE TABLE user_reading_progress (
+    user_id INT PRIMARY KEY,
+    last_surah_number INT NULL,
+    last_surah_name VARCHAR(100) NULL,
+    last_ayah_number INT NULL,
+    last_dua_id INT NULL,
+    last_dua_title VARCHAR(100) NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- Streak table
@@ -122,4 +137,7 @@ CREATE INDEX idx_bookmarks_user ON bookmarks(user_id);
 CREATE INDEX idx_user_mission_progress_user ON user_mission_progress(user_id);
 CREATE INDEX idx_articles_status ON articles(status);
 
-echo "Database schema created successfully!"
+INSERT INTO missions (code, title, type, target_count, reward_points, is_daily) VALUES
+    ('login_daily', 'Login harian', 'login', 1, 5, TRUE),
+    ('read_quran', 'Baca satu surah', 'quran', 1, 10, TRUE),
+    ('read_dua', 'Baca satu doa', 'dua', 1, 5, TRUE);
