@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 
 const prayerTimes = [
   { key: 'Fajr', label: 'Subuh' },
@@ -138,9 +138,9 @@ export default function PrayerSchedule({ compact = false }: PrayerScheduleProps)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [locationNotice, setLocationNotice] = useState('');
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
 
-  async function loadSchedule(place: Place, label: string) {
+  const loadSchedule = useCallback(async (place: Place, label: string) => {
     setLoading(true);
     setError('');
     try {
@@ -159,9 +159,9 @@ export default function PrayerSchedule({ compact = false }: PrayerScheduleProps)
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  function requestDeviceLocation() {
+  const requestDeviceLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setLocationNotice('Lokasi perangkat tidak tersedia. Jadwal ditampilkan untuk Jakarta; masukkan kota lain di bawah.');
       void loadSchedule({ kind: 'city', city: 'Jakarta' }, 'Jakarta');
@@ -188,13 +188,18 @@ export default function PrayerSchedule({ compact = false }: PrayerScheduleProps)
       },
       { timeout: 10000, maximumAge: 300000 },
     );
-  }
+  }, [loadSchedule]);
 
   useEffect(() => {
-    requestDeviceLocation();
+    const locationTimer = window.setTimeout(requestDeviceLocation, 0);
+    const clockTimer = window.setTimeout(() => setNow(Date.now()), 0);
     const interval = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(interval);
-  }, []);
+    return () => {
+      window.clearTimeout(locationTimer);
+      window.clearTimeout(clockTimer);
+      window.clearInterval(interval);
+    };
+  }, [requestDeviceLocation]);
 
   async function submitCity(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
