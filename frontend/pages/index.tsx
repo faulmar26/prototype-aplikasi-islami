@@ -1,26 +1,91 @@
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import PrayerSchedule from '../src/components/PrayerSchedule';
+
+const shortcuts = [
+  {
+    href: '/quran',
+    icon: '۞',
+    title: 'Al-Qur’an',
+    description: 'Jelajahi surah dan temukan bacaan.',
+    tone: 'violet',
+  },
+  {
+    href: '/doa',
+    icon: 'د',
+    title: 'Doa harian',
+    description: 'Kumpulan doa untuk menemani aktivitas.',
+    tone: 'amber',
+  },
+  {
+    href: '/prayer',
+    icon: '◷',
+    title: 'Jadwal salat',
+    description: 'Lihat waktu salat sesuai lokasimu.',
+    tone: 'green',
+  },
+];
+
 export default function HomePage() {
+  const [today, setToday] = useState('');
+
+  useEffect(() => {
+    setToday(new Intl.DateTimeFormat('id-ID', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(new Date()));
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-purple-100 p-8">
-      <h1 className="text-4xl font-bold text-indigo-600 mb-6">
-        Aplikasi Islami
-      </h1>
-      <p className="text-lg text-gray-600">
-        Platform integratif untuk jadwal shalat, Qur&apos;an, doa, dan gamifikasi ibadah
-      </p>
-      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <a href="/prayer" className="group bg-indigo-600 text-white rounded-lg px-6 py-3 hover:bg-indigo-700 transition-colors duration-200">
-          <span className="text-2xl">🕌</span>
-          <h3 className="mt-2">Jadwal Shalat</h3>
-        </a>
-        <a href="/quran" className="group bg-purple-600 text-white rounded-lg px-6 py-3 hover:bg-purple-700 transition-colors duration-200">
-          <span className="text-2xl">📖</span>
-          <h3 className="mt-2">Al-Qur&apos;an</h3>
-        </a>
-        <a href="/doa" className="group bg-green-600 text-white rounded-lg px-6 py-3 hover:bg-green-700 transition-colors duration-200">
-          <span className="text-2xl">🤲</span>
-          <h3 className="mt-2">Doa Harian</h3>
-        </a>
-      </div>
+    <div className="page-stack">
+      <section className="welcome-panel">
+        <div>
+          <p className="eyebrow">{today || '\u00a0'}</p>
+          <h1>Assalamu’alaikum</h1>
+          <p className="welcome-copy">
+            Semoga hari ini dipenuhi ketenangan dan keberkahan.
+          </p>
+        </div>
+        <span className="welcome-ornament" aria-hidden="true">☾</span>
+      </section>
+
+      <PrayerSchedule compact />
+
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Temukan ketenangan</p>
+            <h2>Jelajahi ibadah</h2>
+          </div>
+        </div>
+        <div className="shortcut-grid">
+          {shortcuts.map((shortcut) => (
+            <Link
+              className={`shortcut-card shortcut-${shortcut.tone}`}
+              href={shortcut.href}
+              key={shortcut.href}
+            >
+              <span className="shortcut-icon" aria-hidden="true">{shortcut.icon}</span>
+              <span className="shortcut-title">{shortcut.title}</span>
+              <span className="shortcut-description">{shortcut.description}</span>
+              <span className="shortcut-arrow" aria-hidden="true">↗</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="verse-panel">
+        <span className="verse-mark" aria-hidden="true">“</span>
+        <div>
+          <p className="eyebrow">Pengingat hari ini</p>
+          <p className="verse-text">
+            “Ingatlah, hanya dengan mengingat Allah hati menjadi tenteram.”
+          </p>
+          <p className="verse-reference">QS. Ar-Ra’d: 28</p>
+        </div>
+      </section>
     </div>
-  )
+  );
 }
