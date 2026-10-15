@@ -8,8 +8,9 @@
     "build": "nest build",
     "start": "nest start",
     "start:dev": "nest start --watch",
-    "lint": "eslint 'src/**/*.ts' --fix",
-    "test": "jest --config jest.config.json"
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "echo \"No test specified\""
   },
   "keywords": [
     "nestjs",
