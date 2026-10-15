@@ -1,45 +1,138 @@
 export interface DailyDua {
+  id: number;
   title: string;
+  category: 'Pagi' | 'Makan' | 'Aktivitas' | 'Ibadah' | 'Petang';
   arabic: string;
   transliteration: string;
   translation: string;
-  source?: string;
+  source: string;
 }
 
 export const dailyDuas: DailyDua[] = [
   {
+    id: 1,
     title: 'Doa bangun tidur',
+    category: 'Pagi',
     arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',
     transliteration: 'Alhamdu lillahil-ladzi ahyana ba’da ma amatana wa ilaihin-nusyur.',
     translation: 'Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami, dan kepada-Nya kami dibangkitkan.',
     source: 'HR. Al-Bukhari',
   },
   {
+    id: 2,
     title: 'Doa sebelum makan',
+    category: 'Makan',
     arabic: 'بِسْمِ اللَّهِ',
     transliteration: 'Bismillah.',
     translation: 'Dengan nama Allah.',
     source: 'HR. Abu Dawud dan At-Tirmidzi',
   },
   {
+    id: 3,
     title: 'Doa setelah makan',
+    category: 'Makan',
     arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنِي هَذَا وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ',
     transliteration: 'Alhamdu lillahil-ladzi ath’amani hadza wa razaqanihi min ghairi haulin minni wa la quwwah.',
     translation: 'Segala puji bagi Allah yang telah memberiku makanan ini dan menganugerahkannya kepadaku tanpa daya dan kekuatan dariku.',
     source: 'HR. Abu Dawud dan At-Tirmidzi',
   },
   {
+    id: 4,
     title: 'Doa masuk rumah',
-    arabic: 'بِسْمِ اللَّهِ وَلَجْنَا، وَبِسْمِ اللَّهِ خَرَجْنَا، وَعَلَى اللَّهِ رَبِّنَا تَوَكَّلْنَا',
-    transliteration: 'Bismillahi walajna, wa bismillahi kharajna, wa ‘alallahi rabbina tawakkalna.',
-    translation: 'Dengan nama Allah kami masuk, dengan nama Allah kami keluar, dan kepada Allah, Tuhan kami, kami bertawakal.',
+    category: 'Aktivitas',
+    arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ الْمَوْلَجِ وَخَيْرَ الْمَخْرَجِ، بِسْمِ اللَّهِ وَلَجْنَا، وَبِسْمِ اللَّهِ خَرَجْنَا، وَعَلَى اللَّهِ رَبِّنَا تَوَكَّلْنَا',
+    transliteration: 'Allahumma inni as’aluka khairal-mawlaji wa khairal-makhraji. Bismillahi walajna, wa bismillahi kharajna, wa ‘alallahi rabbina tawakkalna.',
+    translation: 'Ya Allah, aku memohon kepada-Mu kebaikan saat masuk dan kebaikan saat keluar. Dengan nama Allah kami masuk, dengan nama Allah kami keluar, dan kepada Allah, Tuhan kami, kami bertawakal.',
     source: 'HR. Abu Dawud',
   },
   {
+    id: 5,
     title: 'Doa sebelum tidur',
+    category: 'Ibadah',
     arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
     transliteration: 'Bismika Allahumma amutu wa ahya.',
     translation: 'Dengan nama-Mu, ya Allah, aku mati dan aku hidup.',
     source: 'HR. Al-Bukhari',
+  },
+  {
+    id: 6,
+    title: 'Doa keluar rumah',
+    category: 'Aktivitas',
+    arabic: 'بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
+    transliteration: 'Bismillahi, tawakkaltu ‘alallah, la hawla wa la quwwata illa billah.',
+    translation: 'Dengan nama Allah, aku bertawakal kepada Allah. Tiada daya dan kekuatan kecuali dengan pertolongan Allah.',
+    source: 'HR. Abu Dawud dan At-Tirmidzi',
+  },
+  {
+    id: 7,
+    title: 'Doa masuk kamar mandi',
+    category: 'Aktivitas',
+    arabic: 'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ',
+    transliteration: 'Allahumma inni a’udzu bika minal-khubutsi wal-khaba’its.',
+    translation: 'Ya Allah, sesungguhnya aku berlindung kepada-Mu dari setan laki-laki dan setan perempuan.',
+    source: 'HR. Al-Bukhari dan Muslim',
+  },
+  {
+    id: 8,
+    title: 'Doa keluar kamar mandi',
+    category: 'Aktivitas',
+    arabic: 'غُفْرَانَكَ',
+    transliteration: 'Ghufranaka.',
+    translation: 'Aku memohon ampunan-Mu.',
+    source: 'HR. Abu Dawud dan At-Tirmidzi',
+  },
+  {
+    id: 9,
+    title: 'Doa masuk masjid',
+    category: 'Ibadah',
+    arabic: 'اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ',
+    transliteration: 'Allahummaftah li abwaba rahmatik.',
+    translation: 'Ya Allah, bukakanlah untukku pintu-pintu rahmat-Mu.',
+    source: 'HR. Muslim',
+  },
+  {
+    id: 10,
+    title: 'Doa keluar masjid',
+    category: 'Ibadah',
+    arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ',
+    transliteration: 'Allahumma inni as’aluka min fadhlik.',
+    translation: 'Ya Allah, sesungguhnya aku memohon karunia-Mu.',
+    source: 'HR. Muslim',
+  },
+  {
+    id: 11,
+    title: 'Doa memohon ilmu',
+    category: 'Pagi',
+    arabic: 'رَبِّ زِدْنِي عِلْمًا',
+    transliteration: 'Rabbi zidni ‘ilma.',
+    translation: 'Ya Tuhanku, tambahkanlah ilmu kepadaku.',
+    source: 'QS. Taha: 114',
+  },
+  {
+    id: 12,
+    title: 'Doa untuk kedua orang tua',
+    category: 'Ibadah',
+    arabic: 'رَبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا',
+    transliteration: 'Rabbir-hamhuma kama rabbayani shaghira.',
+    translation: 'Ya Tuhanku, sayangilah keduanya sebagaimana mereka berdua telah mendidikku pada waktu kecil.',
+    source: 'QS. Al-Isra: 24',
+  },
+  {
+    id: 13,
+    title: 'Doa pagi',
+    category: 'Pagi',
+    arabic: 'اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ',
+    transliteration: 'Allahumma bika ashbahna wa bika amsayna, wa bika nahya wa bika namutu wa ilaikan-nusyur.',
+    translation: 'Ya Allah, dengan pertolongan-Mu kami memasuki pagi dan petang, dengan pertolongan-Mu kami hidup dan mati, dan kepada-Mu kami dibangkitkan.',
+    source: 'HR. Abu Dawud dan At-Tirmidzi',
+  },
+  {
+    id: 14,
+    title: 'Doa petang',
+    category: 'Petang',
+    arabic: 'اللَّهُمَّ بِكَ أَمْسَيْنَا وَبِكَ أَصْبَحْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ الْمَصِيرُ',
+    transliteration: 'Allahumma bika amsayna wa bika ashbahna, wa bika nahya wa bika namutu wa ilaikal-mashir.',
+    translation: 'Ya Allah, dengan pertolongan-Mu kami memasuki petang dan pagi, dengan pertolongan-Mu kami hidup dan mati, dan kepada-Mu tempat kembali.',
+    source: 'HR. Abu Dawud dan At-Tirmidzi',
   },
 ];

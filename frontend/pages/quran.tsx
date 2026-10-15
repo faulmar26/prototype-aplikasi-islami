@@ -1,19 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-
-interface Surah {
-  number: number;
-  name: string;
-  englishName: string;
-  englishNameTranslation: string;
-  numberOfAyahs: number;
-  revelationType: string;
-}
-
-interface SurahResponse {
-  code: number;
-  data: Surah[];
-  status: string;
-}
+import Link from 'next/link';
+import { fetchSurahList, Surah } from '../src/lib/quranApi';
 
 function normalizeSearch(value: string) {
   return value
@@ -35,21 +22,9 @@ export default function QuranPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-
     async function loadSurahs() {
       try {
-        const response = await fetch('https://api.alquran.cloud/v1/surah', {
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          throw new Error('Layanan daftar surah tidak dapat dijangkau.');
-        }
-
-        const result = (await response.json()) as SurahResponse;
-        if (result.code !== 200 || !Array.isArray(result.data)) {
-          throw new Error('Data daftar surah tidak tersedia saat ini.');
-        }
-        setSurahs(result.data);
+        setSurahs(await fetchSurahList(controller.signal));
       } catch (loadError) {
         if (loadError instanceof Error && loadError.name !== 'AbortError') {
           setError(loadError.message);
@@ -58,7 +33,6 @@ export default function QuranPage() {
         if (!controller.signal.aborted) setLoading(false);
       }
     }
-
     void loadSurahs();
     return () => controller.abort();
   }, []);
@@ -67,7 +41,6 @@ export default function QuranPage() {
     const normalizedQuery = normalizeSearch(query.trim());
     if (!normalizedQuery) return surahs;
     const transliterationQuery = normalizeTransliteration(normalizedQuery);
-
     return surahs.filter((surah) =>
       [
         surah.number.toString(),
@@ -86,59 +59,59 @@ export default function QuranPage() {
   }, [query, surahs]);
 
   return (
-    <div className="page-stack">
-      <section className="page-intro">
-        <p className="eyebrow">Baca dan renungkan</p>
-        <h1>Al-Qur’an</h1>
-        <p>Temukan surah berdasarkan nama, arti, atau nomor surah.</p>
-      </section>
-
-      <section className="content-panel quran-panel">
-        <label className="search-label" htmlFor="surah-search">Cari surah</label>
-        <div className="search-field">
+    <div className="quran-page">
+      <section className="quran-hero">
+        <div>
+          <span className="quran-hero-mark" aria-hidden="true">۞</span>
+          <div>
+            <p className="eyebrow">Baca dan renungkan</p>
+            <h1>Al-Qur’an</h1>
+          </div>
+        </div>
+        <label className="quran-search" htmlFor="surah-search">
           <span aria-hidden="true">⌕</span>
           <input
             autoComplete="off"
             id="surah-search"
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Contoh: Al-Fatihah atau 1"
+            placeholder="Nama/nomor surah, atau kata kunci"
             type="search"
             value={query}
           />
+        </label>
+        <p className="quran-search-hint">Contoh: Yasin, 36, atau Al-Baqarah</p>
+      </section>
+
+      <section className="quran-catalog-section">
+        <div className="catalog-toolbar">
+          <div className="catalog-tabs" aria-label="Daftar Al-Qur’an">
+            <span className="catalog-tab catalog-tab-active">Surah</span>
+            <span className="catalog-tab catalog-tab-muted">114 surah</span>
+          </div>
+          <span className="catalog-sort-label">Urutan mushaf ↑</span>
         </div>
-        {!loading && !error && (
-          <p className="result-count">
-            {filteredSurahs.length} surah{filteredSurahs.length === 1 ? '' : ''}
-            {query.trim() ? ' ditemukan' : ''}
-          </p>
-        )}
+
         {loading && <p className="status-message">Memuat daftar surah…</p>}
         {error && (
           <div className="error-message" role="alert">
             <p>{error}</p>
-            <button className="text-button" onClick={() => window.location.reload()} type="button">
-              Coba lagi
-            </button>
+            <button className="text-button" onClick={() => window.location.reload()} type="button">Coba lagi</button>
           </div>
         )}
         {!loading && !error && filteredSurahs.length === 0 && (
           <p className="empty-message">Tidak ada surah yang cocok dengan pencarianmu.</p>
         )}
-        {!loading && !error && filteredSurahs.length > 0 && (
-          <div className="surah-list">
+        {!loading && !error && (
+          <div className="surah-catalog">
             {filteredSurahs.map((surah) => (
-              <article className="surah-row" key={surah.number}>
-                <span className="surah-number">{surah.number}</span>
-                <div className="surah-details">
-                  <h2>{surah.englishName}</h2>
-                  <p>
-                    {surah.englishNameTranslation} <span aria-hidden="true">·</span>{' '}
-                    {surah.numberOfAyahs} ayat <span aria-hidden="true">·</span>{' '}
-                    {surah.revelationType === 'Meccan' ? 'Makkiyah' : 'Madaniyah'}
-                  </p>
-                </div>
-                <p className="surah-arabic" lang="ar" dir="rtl">{surah.name}</p>
-              </article>
+              <Link className="surah-catalog-card" href={`/quran/${surah.number}`} key={surah.number}>
+                <span className="surah-catalog-number">{surah.number}</span>
+                <span className="surah-catalog-copy">
+                  <strong>{surah.englishName}</strong>
+                  <span>{surah.englishNameTranslation} · {surah.numberOfAyahs} ayat</span>
+                </span>
+                <span className="surah-catalog-arabic" dir="rtl" lang="ar">{surah.name}</span>
+              </Link>
             ))}
           </div>
         )}
