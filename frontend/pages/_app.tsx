@@ -2,6 +2,8 @@ import type { AppProps } from 'next/app';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import { CursorGlow } from '../src/components/CursorGlow';
+import { ThemeControl } from '../src/components/ThemeControl';
 import { AccountProvider, useAccount } from '../src/lib/account';
 import '../src/styles/global.css';
 
@@ -36,6 +38,7 @@ function AppLayout({ Component, pageProps }: Pick<AppProps, 'Component' | 'pageP
 
   return (
     <div className="app-shell">
+      <CursorGlow />
       <header className="site-header">
         <div className="header-inner">
           <Link aria-label="Beranda Arah, ke halaman beranda" className="brand" href="/">
@@ -44,7 +47,9 @@ function AppLayout({ Component, pageProps }: Pick<AppProps, 'Component' | 'pageP
           </Link>
           <nav aria-label="Navigasi utama" className="main-navigation">
             {navigation.map((item) => {
-              const active = router.pathname === item.href;
+              const active = router.pathname === item.href ||
+                (item.href === '/quran' && router.pathname.startsWith('/quran/')) ||
+                (item.href === '/doa' && router.pathname.startsWith('/doa/'));
               return (
                 <Link
                   aria-current={active ? 'page' : undefined}
@@ -70,6 +75,7 @@ function AppLayout({ Component, pageProps }: Pick<AppProps, 'Component' | 'pageP
                 {ready ? 'Masuk' : 'Akun'}
               </Link>
             )}
+            <ThemeControl />
           </nav>
         </div>
       </header>

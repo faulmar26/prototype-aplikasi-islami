@@ -89,7 +89,7 @@ export default function HomePage() {
                 <Link
                   className="last-read-card"
                   href={profile.reading?.last_surah_number
-                    ? `/quran?surah=${profile.reading.last_surah_number}`
+                    ? `/quran/${profile.reading.last_surah_number}`
                     : '/quran'}
                 >
                   <span className="eyebrow">Bacaan Al-Qur’an terakhir</span>
@@ -100,7 +100,10 @@ export default function HomePage() {
                       : 'Pilih surah yang ingin dibaca'}
                   </span>
                 </Link>
-                <Link className="last-read-card" href="/doa">
+                <Link
+                  className="last-read-card"
+                  href={profile.reading?.last_dua_id ? `/doa/${profile.reading.last_dua_id}` : '/doa'}
+                >
                   <span className="eyebrow">Doa terakhir dibaca</span>
                   <strong>{profile.reading?.last_dua_title ?? 'Temukan doa harian'}</strong>
                   <span>{profile.reading?.last_dua_id ? 'Buka daftar doa' : 'Pilih doa untuk dibaca'}</span>
