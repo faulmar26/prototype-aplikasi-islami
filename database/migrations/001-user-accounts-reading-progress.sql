@@ -1,5 +1,3 @@
-USE islami_app;
-
 ALTER TABLE users
     MODIFY email VARCHAR(255) NULL,
     ADD COLUMN username VARCHAR(32) NULL AFTER id,

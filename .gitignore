@@ -38,6 +38,7 @@ build/
 .env.test.local
 .env.production.local
 *.env
+backend/certs/ca.pem
 
 # IDE / Editor
 .vscode/

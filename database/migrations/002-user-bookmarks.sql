@@ -1,5 +1,3 @@
-USE islami_app;
-
 CREATE TABLE user_bookmark_categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,

@@ -1,6 +1,3 @@
-CREATE DATABASE IF NOT EXISTS islami_app;
-USE islami_app;
-
 -- Users table
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
