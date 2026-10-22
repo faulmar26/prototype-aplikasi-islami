@@ -2,7 +2,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAccount } from '../../src/lib/account';
-import { Ayah, BASMALA_ARABIC, fetchSurahList, fetchSurahReading, ReadingSurah, Surah } from '../../src/lib/quranApi';
+import {
+  Ayah,
+  BASMALA_ARABIC,
+  fetchSurahList,
+  fetchSurahReading,
+  getIndonesianSurahTranslation,
+  ReadingSurah,
+  Surah,
+} from '../../src/lib/quranApi';
 
 interface ReadingPosition {
   ayahNumber: number;
@@ -11,18 +19,28 @@ interface ReadingPosition {
 
 export default function SurahReadingPage() {
   const router = useRouter();
-  const { user, profile, saveQuranReading } = useAccount();
+  const {
+    user,
+    profile,
+    bookmarks,
+    createBookmark,
+    deleteBookmark,
+    saveQuranReading,
+  } = useAccount();
   const readerRef = useRef<HTMLElement | null>(null);
   const [surah, setSurah] = useState<Surah | null>(null);
   const [reading, setReading] = useState<ReadingSurah | null>(null);
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [bookmarkActionAyah, setBookmarkActionAyah] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [bookmarkMessage, setBookmarkMessage] = useState('');
   const [messageIsError, setMessageIsError] = useState(false);
   const [savedPosition, setSavedPosition] = useState<ReadingPosition | null>(null);
   const [targetAyah, setTargetAyah] = useState('1');
+  const [selectedBookmarkCategoryId, setSelectedBookmarkCategoryId] = useState<number | null>(null);
 
   const currentNumber = useMemo(() => {
     const number = Number(router.query.number);
@@ -134,6 +152,51 @@ export default function SurahReadingPage() {
 
   const previousSurah = surah ? surahs.find((item) => item.number === surah.number - 1) : null;
   const nextSurah = surah ? surahs.find((item) => item.number === surah.number + 1) : null;
+  const defaultBookmarkCategory = bookmarks.categories.find((category) => category.type === 'quran');
+  const bookmarkCategoryId = selectedBookmarkCategoryId ??
+    defaultBookmarkCategory?.id ??
+    bookmarks.categories.find((category) => category.type === 'custom')?.id ??
+    null;
+  const bookmarkedAyahs = useMemo(() => new Set(
+    bookmarks.bookmarks
+      .filter((item) =>
+        item.categoryId === bookmarkCategoryId &&
+        item.contentType === 'quran' &&
+        item.surahNumber === surah?.number,
+      )
+      .map((item) => item.ayahNumber),
+  ), [bookmarkCategoryId, bookmarks.bookmarks, surah?.number]);
+
+  async function toggleAyahBookmark(ayahNumber: number) {
+    if (!surah || !bookmarkCategoryId) return;
+    const existing = bookmarks.bookmarks.find((item) =>
+      item.categoryId === bookmarkCategoryId &&
+      item.contentType === 'quran' &&
+      item.surahNumber === surah.number &&
+      item.ayahNumber === ayahNumber,
+    );
+    setBookmarkActionAyah(ayahNumber);
+    setBookmarkMessage('');
+    try {
+      if (existing) {
+        await deleteBookmark(existing.id);
+        setBookmarkMessage(`Bookmark ayat ${ayahNumber} dihapus.`);
+      } else {
+        await createBookmark({
+          categoryId: bookmarkCategoryId,
+          contentType: 'quran',
+          surahNumber: surah.number,
+          surahName: surah.englishName,
+          ayahNumber,
+        });
+        setBookmarkMessage(`Ayat ${ayahNumber} ditambahkan ke bookmark.`);
+      }
+    } catch (bookmarkError) {
+      setBookmarkMessage(bookmarkError instanceof Error ? bookmarkError.message : 'Bookmark gagal disimpan.');
+    } finally {
+      setBookmarkActionAyah(null);
+    }
+  }
 
   return (
     <div className="quran-reading-page">
@@ -193,7 +256,7 @@ export default function SurahReadingPage() {
             </p>
             <p className="surah-reader-arabic-name" dir="rtl" lang="ar">{surah.name}</p>
             <h1>{surah.englishName}</h1>
-            <p className="surah-reader-translation">{surah.englishNameTranslation}</p>
+            <p className="surah-reader-translation">{getIndonesianSurahTranslation(surah.number)}</p>
           </header>
 
           {user ? (
@@ -212,6 +275,28 @@ export default function SurahReadingPage() {
               {message}
             </p>
           )}
+          {user && (
+            <div className="bookmark-action-bar">
+              <label>
+                <span>Simpan bookmark ke</span>
+                <select
+                  aria-label="Kategori bookmark ayat"
+                  onChange={(event) => setSelectedBookmarkCategoryId(Number(event.target.value))}
+                  value={bookmarkCategoryId ?? ''}
+                >
+                  {bookmarks.categories
+                    .filter((category) => category.type === 'quran' || category.type === 'custom')
+                    .map((category) => (
+                      <option key={category.id} value={category.id}>{category.name}</option>
+                    ))}
+                </select>
+              </label>
+              <Link href="/bookmarks">Kelola kategori</Link>
+            </div>
+          )}
+          {bookmarkMessage && (
+            <p className="bookmark-feedback" role="status">{bookmarkMessage}</p>
+          )}
 
           {reading.hasBasmala && (
             <div className="basmala-display" lang="ar" dir="rtl" aria-label="Bismillahirrahmanirrahim">
@@ -228,17 +313,31 @@ export default function SurahReadingPage() {
                   <div className="reader-ayah-meta">
                     <span className="reader-ayah-badge">{ayah.numberInSurah}</span>
                     {user && (
-                      <button
-                        aria-label={`Simpan posisi bacaan di ayat ${ayah.numberInSurah}`}
-                        className={`reader-save-position${savedPosition?.surahNumber === surah.number && savedPosition.ayahNumber === ayah.numberInSurah ? ' reader-position-saved' : ''}`}
-                        disabled={saving}
-                        onClick={() => void savePosition(ayah.numberInSurah)}
-                        type="button"
-                      >
-                        {savedPosition?.surahNumber === surah.number && savedPosition.ayahNumber === ayah.numberInSurah
-                          ? '✓ Tersimpan'
-                          : 'Simpan posisi'}
-                      </button>
+                      <div className="reader-ayah-actions">
+                        <button
+                          aria-label={`Simpan posisi bacaan di ayat ${ayah.numberInSurah}`}
+                          className={`reader-save-position${savedPosition?.surahNumber === surah.number && savedPosition.ayahNumber === ayah.numberInSurah ? ' reader-position-saved' : ''}`}
+                          disabled={saving}
+                          onClick={() => void savePosition(ayah.numberInSurah)}
+                          type="button"
+                        >
+                          {savedPosition?.surahNumber === surah.number && savedPosition.ayahNumber === ayah.numberInSurah
+                            ? '✓ Posisi tersimpan'
+                            : 'Simpan posisi'}
+                        </button>
+                        {bookmarkCategoryId && (
+                          <button
+                            aria-label={`${bookmarkedAyahs.has(ayah.numberInSurah) ? 'Hapus bookmark' : 'Bookmark'} ayat ${ayah.numberInSurah}`}
+                            aria-pressed={bookmarkedAyahs.has(ayah.numberInSurah)}
+                            className="reader-bookmark-button"
+                            disabled={bookmarkActionAyah === ayah.numberInSurah}
+                            onClick={() => void toggleAyahBookmark(ayah.numberInSurah)}
+                            type="button"
+                          >
+                            {bookmarkedAyahs.has(ayah.numberInSurah) ? '★ Bookmark' : '☆ Bookmark'}
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                   <div className="reader-ayah-content">

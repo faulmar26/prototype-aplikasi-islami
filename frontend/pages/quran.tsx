@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { fetchSurahList, Surah } from '../src/lib/quranApi';
+import { FeatureIcon } from '../src/components/FeatureIcon';
+import { fetchSurahList, getIndonesianSurahTranslation, Surah } from '../src/lib/quranApi';
 
 function normalizeSearch(value: string) {
   return value
@@ -46,7 +47,7 @@ export default function QuranPage() {
         surah.number.toString(),
         surah.name,
         surah.englishName,
-        surah.englishNameTranslation,
+        getIndonesianSurahTranslation(surah.number),
       ].some((value) => {
         const normalizedValue = normalizeSearch(value);
         return (
@@ -62,7 +63,9 @@ export default function QuranPage() {
     <div className="quran-page">
       <section className="quran-hero">
         <div>
-          <span className="quran-hero-mark" aria-hidden="true">۞</span>
+          <span className="quran-hero-mark" aria-hidden="true">
+            <FeatureIcon name="quran" />
+          </span>
           <div>
             <p className="eyebrow">Baca dan renungkan</p>
             <h1>Al-Qur’an</h1>
@@ -108,7 +111,7 @@ export default function QuranPage() {
                 <span className="surah-catalog-number">{surah.number}</span>
                 <span className="surah-catalog-copy">
                   <strong>{surah.englishName}</strong>
-                  <span>{surah.englishNameTranslation} · {surah.numberOfAyahs} ayat</span>
+                  <span>{getIndonesianSurahTranslation(surah.number)} · {surah.numberOfAyahs} ayat</span>
                 </span>
                 <span className="surah-catalog-arabic" dir="rtl" lang="ar">{surah.name}</span>
               </Link>

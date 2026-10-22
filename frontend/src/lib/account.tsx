@@ -39,9 +39,34 @@ export interface UserProfile {
   points: number;
 }
 
+export interface BookmarkCategory {
+  id: number;
+  name: string;
+  type: 'quran' | 'dua' | 'custom';
+}
+
+export interface UserBookmark {
+  id: number;
+  categoryId: number;
+  categoryName: string;
+  contentType: 'quran' | 'dua';
+  surahNumber: number | null;
+  ayahNumber: number | null;
+  duaId: number | null;
+  title: string;
+  createdAt: string;
+}
+
+interface UserBookmarks {
+  categories: BookmarkCategory[];
+  bookmarks: UserBookmark[];
+}
+
 interface AccountContextValue {
   user: AccountUser | null;
   profile: UserProfile | null;
+  bookmarks: UserBookmarks;
+  bookmarksError: string;
   ready: boolean;
   profileError: string;
   authenticate: (mode: 'login' | 'register', values: {
@@ -57,6 +82,19 @@ interface AccountContextValue {
     completed?: boolean;
   }) => Promise<void>;
   saveDuaReading: (reading: { duaId: number; duaTitle: string }) => Promise<void>;
+  refreshBookmarks: () => Promise<void>;
+  createBookmarkCategory: (category: { name: string }) => Promise<void>;
+  createBookmark: (bookmark: {
+    categoryId: number;
+    contentType: 'quran' | 'dua';
+    surahNumber?: number;
+    ayahNumber?: number;
+    surahName?: string;
+    duaId?: number;
+    duaTitle?: string;
+  }) => Promise<void>;
+  deleteBookmark: (bookmarkId: number) => Promise<void>;
+  deleteBookmarkCategory: (categoryId: number) => Promise<void>;
 }
 
 const AccountContext = createContext<AccountContextValue | null>(null);
@@ -93,6 +131,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AccountUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileError, setProfileError] = useState('');
+  const [bookmarks, setBookmarks] = useState<UserBookmarks>({ categories: [], bookmarks: [] });
+  const [bookmarksError, setBookmarksError] = useState('');
   const [ready, setReady] = useState(false);
 
   const refreshProfile = useCallback(async () => {
@@ -102,6 +142,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       setProfileError('');
     } catch (error) {
       setProfileError(error instanceof Error ? error.message : 'Progres akun gagal dimuat.');
+    }
+  }, []);
+
+  const refreshBookmarks = useCallback(async () => {
+    try {
+      const result = await apiRequest<UserBookmarks>('/profile/bookmarks');
+      setBookmarks(result);
+      setBookmarksError('');
+    } catch (error) {
+      setBookmarksError(error instanceof Error ? error.message : 'Bookmark gagal dimuat.');
     }
   }, []);
 
@@ -118,7 +168,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         } catch (error) {
           checkInError = error instanceof Error ? error.message : 'Login harian gagal dicatat.';
         }
-        await refreshProfile();
+        await Promise.all([refreshProfile(), refreshBookmarks()]);
         if (checkInError) setProfileError(checkInError);
       } catch {
         if (active) {
@@ -133,7 +183,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     return () => {
       active = false;
     };
-  }, [refreshProfile]);
+  }, [refreshBookmarks, refreshProfile]);
 
   const authenticate = useCallback(async (
     mode: 'login' | 'register',
@@ -144,14 +194,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify(values),
     });
     setUser(result);
-    await refreshProfile();
-  }, [refreshProfile]);
+    await Promise.all([refreshProfile(), refreshBookmarks()]);
+  }, [refreshBookmarks, refreshProfile]);
 
   const logout = useCallback(async () => {
     await apiRequest<{ success: boolean }>('/auth/logout', { method: 'POST' });
     setUser(null);
     setProfile(null);
     setProfileError('');
+    setBookmarks({ categories: [], bookmarks: [] });
+    setBookmarksError('');
   }, []);
 
   const saveQuranReading = useCallback(async (reading: {
@@ -169,17 +221,55 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     await refreshProfile();
   }, [refreshProfile]);
 
+  const createBookmarkCategory = useCallback(async (category: { name: string }) => {
+    await apiRequest('/profile/bookmark-categories', {
+      method: 'POST',
+      body: JSON.stringify({ ...category, type: 'custom' }),
+    });
+    await refreshBookmarks();
+  }, [refreshBookmarks]);
+
+  const createBookmark = useCallback(async (bookmark: {
+    categoryId: number;
+    contentType: 'quran' | 'dua';
+    surahNumber?: number;
+    ayahNumber?: number;
+    surahName?: string;
+    duaId?: number;
+    duaTitle?: string;
+  }) => {
+    await apiRequest('/profile/bookmarks', { method: 'POST', body: JSON.stringify(bookmark) });
+    await refreshBookmarks();
+  }, [refreshBookmarks]);
+
+  const deleteBookmark = useCallback(async (bookmarkId: number) => {
+    await apiRequest(`/profile/bookmarks/${bookmarkId}`, { method: 'DELETE' });
+    await refreshBookmarks();
+  }, [refreshBookmarks]);
+
+  const deleteBookmarkCategory = useCallback(async (categoryId: number) => {
+    await apiRequest(`/profile/bookmark-categories/${categoryId}`, { method: 'DELETE' });
+    await refreshBookmarks();
+  }, [refreshBookmarks]);
+
   return (
     <AccountContext.Provider
       value={{
         user,
         profile,
+        bookmarks,
+        bookmarksError,
         ready,
         profileError,
         authenticate,
         logout,
         saveQuranReading,
         saveDuaReading,
+        refreshBookmarks,
+        createBookmarkCategory,
+        createBookmark,
+        deleteBookmark,
+        deleteBookmarkCategory,
       }}
     >
       {children}

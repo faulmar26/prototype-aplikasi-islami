@@ -6,9 +6,19 @@ import { useAccount } from '../../src/lib/account';
 
 export default function DuaDetailPage() {
   const router = useRouter();
-  const { user, profile, saveDuaReading } = useAccount();
+  const {
+    user,
+    profile,
+    bookmarks,
+    createBookmark,
+    deleteBookmark,
+    saveDuaReading,
+  } = useAccount();
   const [saving, setSaving] = useState(false);
+  const [bookmarkSaving, setBookmarkSaving] = useState(false);
+  const [selectedBookmarkCategoryId, setSelectedBookmarkCategoryId] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<{ message: string; error: boolean } | null>(null);
+  const [bookmarkFeedback, setBookmarkFeedback] = useState<{ message: string; error: boolean } | null>(null);
   const id = Number(router.query.id);
   const dua = dailyDuas.find((item) => item.id === id);
 
@@ -26,6 +36,42 @@ export default function DuaDetailPage() {
       });
     } finally {
       setSaving(false);
+    }
+  }
+
+  const defaultBookmarkCategory = bookmarks.categories.find((category) => category.type === 'dua');
+  const bookmarkCategoryId = selectedBookmarkCategoryId ??
+    defaultBookmarkCategory?.id ??
+    bookmarks.categories.find((category) => category.type === 'custom')?.id ??
+    null;
+  const existingBookmark = bookmarks.bookmarks.find((item) =>
+    item.categoryId === bookmarkCategoryId && item.contentType === 'dua' && item.duaId === dua?.id,
+  );
+
+  async function toggleDuaBookmark() {
+    if (!dua || !bookmarkCategoryId) return;
+    setBookmarkSaving(true);
+    setBookmarkFeedback(null);
+    try {
+      if (existingBookmark) {
+        await deleteBookmark(existingBookmark.id);
+        setBookmarkFeedback({ message: 'Bookmark doa dihapus.', error: false });
+      } else {
+        await createBookmark({
+          categoryId: bookmarkCategoryId,
+          contentType: 'dua',
+          duaId: dua.id,
+          duaTitle: dua.title,
+        });
+        setBookmarkFeedback({ message: 'Doa ditambahkan ke bookmark.', error: false });
+      }
+    } catch (bookmarkError) {
+      setBookmarkFeedback({
+        message: bookmarkError instanceof Error ? bookmarkError.message : 'Bookmark gagal disimpan.',
+        error: true,
+      });
+    } finally {
+      setBookmarkSaving(false);
     }
   }
 
@@ -65,6 +111,39 @@ export default function DuaDetailPage() {
           <p className="eyebrow">Terjemahan</p>
           <p className="dua-detail-translation">{dua.translation}</p>
         </section>
+        {bookmarkFeedback && (
+          <p className={bookmarkFeedback.error ? 'error-message' : 'success-message'} role={bookmarkFeedback.error ? 'alert' : 'status'}>
+            {bookmarkFeedback.message}
+          </p>
+        )}
+        {user && (
+          <div className="dua-bookmark-actions">
+            <label>
+              <span>Simpan bookmark ke</span>
+              <select
+                aria-label="Kategori bookmark doa"
+                onChange={(event) => setSelectedBookmarkCategoryId(Number(event.target.value))}
+                value={bookmarkCategoryId ?? ''}
+              >
+                {bookmarks.categories
+                  .filter((category) => category.type === 'dua' || category.type === 'custom')
+                  .map((category) => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                  ))}
+              </select>
+            </label>
+            <button
+              aria-pressed={Boolean(existingBookmark)}
+              className="secondary-button"
+              disabled={!bookmarkCategoryId || bookmarkSaving}
+              onClick={() => void toggleDuaBookmark()}
+              type="button"
+            >
+              {bookmarkSaving ? 'Menyimpan…' : existingBookmark ? '★ Hapus bookmark' : '☆ Bookmark doa'}
+            </button>
+            <Link href="/bookmarks">Kelola kategori</Link>
+          </div>
+        )}
         {feedback && (
           <p className={feedback.error ? 'error-message' : 'success-message'} role={feedback.error ? 'alert' : 'status'}>
             {feedback.message}

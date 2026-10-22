@@ -14,7 +14,8 @@ export class JwtAuthGuard implements CanActivate {
       ?.split(';')
       .map((part) => part.trim())
       .find((part) => part.startsWith('islami_session='));
-    const token = cookie?.slice('islami_session='.length);
+    const rawToken = cookie?.slice('islami_session='.length);
+    const token = rawToken ? decodeURIComponent(rawToken) : undefined;
 
     if (!token) throw new UnauthorizedException('Silakan masuk untuk menyimpan progres.');
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -13,11 +13,29 @@ export function ThemeControl() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  function toggleTheme() {
+  function toggleTheme(event: MouseEvent<HTMLButtonElement>) {
     const nextTheme: Theme = theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = nextTheme;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const originX = event.clientX || bounds.left + bounds.width / 2;
+    const originY = event.clientY || bounds.top + bounds.height / 2;
+    const root = document.documentElement;
+    root.style.setProperty('--theme-origin-x', `${originX}px`);
+    root.style.setProperty('--theme-origin-y', `${originY}px`);
     window.localStorage.setItem('arah-theme', nextTheme);
-    setTheme(nextTheme);
+
+    const applyTheme = () => {
+      root.dataset.theme = nextTheme;
+      setTheme(nextTheme);
+    };
+    const transitionDocument = document as Document & {
+      startViewTransition?: (callback: () => void) => { finished: Promise<void> };
+    };
+
+    if (transitionDocument.startViewTransition) {
+      transitionDocument.startViewTransition(applyTheme);
+    } else {
+      applyTheme();
+    }
   }
 
   return (

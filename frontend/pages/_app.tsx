@@ -1,7 +1,7 @@
 import type { AppProps } from 'next/app';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CursorGlow } from '../src/components/CursorGlow';
 import { ThemeControl } from '../src/components/ThemeControl';
 import { AccountProvider, useAccount } from '../src/lib/account';
@@ -19,12 +19,22 @@ function AppLayout({ Component, pageProps }: Pick<AppProps, 'Component' | 'pageP
   const router = useRouter();
   const { user, logout, ready } = useAccount();
   const [logoutError, setLogoutError] = useState('');
+  const [pageVisible, setPageVisible] = useState(true);
+
+  useEffect(() => {
+    function handleVisibilityChange() {
+      setPageVisible(document.visibilityState === 'visible');
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
   const navigation = [
     { href: '/', label: 'Beranda' },
     { href: '/prayer', label: 'Jadwal salat' },
     { href: '/quran', label: 'Al-Qur’an' },
     { href: '/doa', label: 'Doa harian' },
   ];
+  if (user) navigation.push({ href: '/bookmarks', label: 'Bookmark' });
 
   async function handleLogout() {
     setLogoutError('');
@@ -81,7 +91,9 @@ function AppLayout({ Component, pageProps }: Pick<AppProps, 'Component' | 'pageP
       </header>
       {logoutError && <p className="global-account-error" role="alert">{logoutError}</p>}
       <main className="main-content">
-        <Component {...pageProps} />
+        <div className={`page-transition${pageVisible ? ' page-transition-active' : ''}`} key={router.asPath}>
+          <Component {...pageProps} />
+        </div>
       </main>
       <footer className="site-footer">Semoga setiap langkah membawa kebaikan.</footer>
     </div>
