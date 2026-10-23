@@ -752,6 +752,7 @@ a {
   font-family: "Noto Naskh Arabic", "Times New Roman", serif;
   font-size: 23px;
   line-height: 1.8;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -763,6 +764,7 @@ a {
   color: var(--muted);
   font-size: 11px;
   line-height: 1.6;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
