@@ -61,7 +61,7 @@ export default function QuranPage() {
 
   return (
     <div className="quran-page">
-      <section className="quran-hero">
+      <section className="quran-hero" data-scroll-reveal>
         <div>
           <span className="quran-hero-mark" aria-hidden="true">
             <FeatureIcon name="quran" />
@@ -85,7 +85,7 @@ export default function QuranPage() {
         <p className="quran-search-hint">Contoh: Yasin, 36, atau Al-Baqarah</p>
       </section>
 
-      <section className="quran-catalog-section">
+      <section className="quran-catalog-section" data-scroll-reveal>
         <div className="catalog-toolbar">
           <div className="catalog-tabs" aria-label="Daftar Al-Qur’an">
             <span className="catalog-tab catalog-tab-active">Surah</span>
@@ -107,7 +107,7 @@ export default function QuranPage() {
         {!loading && !error && (
           <div className="surah-catalog">
             {filteredSurahs.map((surah) => (
-              <Link className="surah-catalog-card" href={`/quran/${surah.number}`} key={surah.number}>
+              <Link className="surah-catalog-card" data-scroll-reveal href={`/quran/${surah.number}`} key={surah.number}>
                 <span className="surah-catalog-number">{surah.number}</span>
                 <span className="surah-catalog-copy">
                   <strong>{surah.englishName}</strong>

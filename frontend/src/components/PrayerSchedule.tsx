@@ -233,7 +233,7 @@ export default function PrayerSchedule({ compact = false }: PrayerScheduleProps)
   const today = days[0];
 
   return (
-    <section className={`prayer-panel${compact ? ' prayer-panel-compact' : ''}`}>
+    <section className={`prayer-panel${compact ? ' prayer-panel-compact' : ''}`} data-scroll-reveal>
       <div className="prayer-panel-header">
         <div>
           <p className="eyebrow">{today ? formatToday(today.timezone) : 'Jadwal harian'}</p>

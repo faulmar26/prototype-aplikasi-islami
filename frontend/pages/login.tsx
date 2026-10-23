@@ -39,7 +39,7 @@ export default function LoginPage() {
 
   if (ready && user) {
     return (
-      <section className="auth-card">
+      <section className="auth-card" data-scroll-reveal>
         <p className="eyebrow">Akunmu</p>
         <h1>Kamu sudah masuk</h1>
         <p className="auth-description">Progres ibadahmu tersimpan untuk akun {user.name}.</p>
@@ -49,7 +49,7 @@ export default function LoginPage() {
   }
 
   return (
-    <section className="auth-card">
+    <section className="auth-card" data-scroll-reveal>
       <div className="auth-emblem" aria-hidden="true">☾</div>
       <p className="eyebrow">{mode === 'login' ? 'Selamat datang kembali' : 'Mulai perjalananmu'}</p>
       <h1>{mode === 'login' ? 'Masuk ke Arah' : 'Buat akun Arah'}</h1>

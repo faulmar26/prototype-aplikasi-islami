@@ -85,7 +85,7 @@ export default function HomePage() {
 
   return (
     <div className="page-stack">
-      <section className="welcome-panel">
+      <section className="welcome-panel" data-scroll-reveal>
         <div>
           <p className="eyebrow">{today || '\u00a0'}</p>
           <h1>{user ? `Assalamu’alaikum, ${user.name || user.username}` : 'Assalamu’alaikum'}</h1>
@@ -99,7 +99,7 @@ export default function HomePage() {
       <PrayerSchedule compact />
 
       {user ? (
-        <section className="progress-panel">
+        <section className="progress-panel" data-scroll-reveal>
           <div className="progress-heading">
             <div>
               <p className="eyebrow">Perjalanan ibadahmu</p>
@@ -153,7 +153,7 @@ export default function HomePage() {
           )}
         </section>
       ) : (
-        <section className="progress-panel guest-progress">
+        <section className="progress-panel guest-progress" data-scroll-reveal>
           <div>
             <p className="eyebrow">Simpan perjalananmu</p>
             <h2>Mulai kumpulkan progres ibadah</h2>
@@ -163,7 +163,7 @@ export default function HomePage() {
         </section>
       )}
 
-      <section className="section-block">
+      <section className="section-block" data-scroll-reveal>
         <div className="section-heading">
           <div>
             <p className="eyebrow">Temukan ketenangan</p>
@@ -174,6 +174,7 @@ export default function HomePage() {
           {shortcuts.map((shortcut) => (
             <Link
               className={`shortcut-card shortcut-${shortcut.tone}`}
+              data-scroll-reveal
               href={shortcut.href}
               key={shortcut.href}
             >
@@ -190,7 +191,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section aria-busy={reminderIndex === null} className="verse-panel">
+      <section aria-busy={reminderIndex === null} className="verse-panel" data-scroll-reveal>
         <span className="verse-mark" aria-hidden="true">“</span>
         <div>
           <p className="eyebrow">Pengingat hari ini</p>

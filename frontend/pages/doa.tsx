@@ -13,7 +13,7 @@ function normalizeSearch(value: string) {
 function DuaCard({ dua, lastDuaId }: { dua: DailyDua; lastDuaId?: number | null }) {
   const isLastRead = lastDuaId === dua.id;
   return (
-    <Link className="dua-catalog-card" href={`/doa/${dua.id}`}>
+    <Link className="dua-catalog-card" data-scroll-reveal href={`/doa/${dua.id}`}>
       <div className="dua-catalog-topline">
         <span className="dua-category-chip">{dua.category}</span>
         {isLastRead && <span className="dua-last-read">Terakhir dibaca</span>}
@@ -44,7 +44,7 @@ export default function DoaPage() {
 
   return (
     <div className="dua-page">
-      <section className="dua-page-hero">
+      <section className="dua-page-hero" data-scroll-reveal>
         <p className="eyebrow">Menemani keseharian</p>
         <h1>Doa harian</h1>
         <p>Kumpulan doa dari Al-Qur’an dan sunah. Pilih satu untuk membaca teks Arab, transliterasi, dan artinya.</p>
@@ -57,7 +57,7 @@ export default function DoaPage() {
         )}
       </section>
 
-      <section className="dua-library">
+      <section className="dua-library" data-scroll-reveal>
         <label className="quran-search dua-search" htmlFor="dua-search">
           <span aria-hidden="true">⌕</span>
           <input

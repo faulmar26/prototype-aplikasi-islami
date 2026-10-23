@@ -93,7 +93,7 @@ export default function DuaDetailPage() {
   return (
     <div className="dua-detail-page">
       <Link className="dua-back-link" href="/doa">‹ Semua doa</Link>
-      <article className="dua-detail-card">
+      <article className="dua-detail-card" data-scroll-reveal>
         <div className="dua-detail-heading">
           <span className="dua-category-chip">{dua.category}</span>
           <p className="eyebrow">Doa harian pilihan</p>
@@ -103,11 +103,11 @@ export default function DuaDetailPage() {
         <div className="dua-detail-arabic-wrap">
           <p className="dua-detail-arabic" dir="rtl" lang="ar">{dua.arabic}</p>
         </div>
-        <section className="dua-detail-section">
+        <section className="dua-detail-section" data-scroll-reveal>
           <p className="eyebrow">Transliterasi</p>
           <p className="dua-detail-transliteration">{dua.transliteration}</p>
         </section>
-        <section className="dua-detail-section">
+        <section className="dua-detail-section" data-scroll-reveal>
           <p className="eyebrow">Terjemahan</p>
           <p className="dua-detail-translation">{dua.translation}</p>
         </section>
@@ -162,7 +162,7 @@ export default function DuaDetailPage() {
           <Link className="primary-button dua-mark-read" href="/login">Masuk untuk menyimpan bacaan</Link>
         )}
       </article>
-      <nav className="dua-detail-pagination" aria-label="Doa sebelumnya dan selanjutnya">
+      <nav className="dua-detail-pagination" aria-label="Doa sebelumnya dan selanjutnya" data-scroll-reveal>
         {previousDua
           ? <Link href={`/doa/${previousDua.id}`}>‹ {previousDua.title}</Link>
           : <span />}

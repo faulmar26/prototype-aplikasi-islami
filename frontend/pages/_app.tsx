@@ -1,7 +1,7 @@
 import type { AppProps } from 'next/app';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CursorGlow } from '../src/components/CursorGlow';
 import { ThemeControl } from '../src/components/ThemeControl';
 import { AccountProvider, useAccount } from '../src/lib/account';
@@ -19,15 +19,49 @@ function AppLayout({ Component, pageProps }: Pick<AppProps, 'Component' | 'pageP
   const router = useRouter();
   const { user, logout, ready } = useAccount();
   const [logoutError, setLogoutError] = useState('');
-  const [pageVisible, setPageVisible] = useState(true);
+  const mainRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    function handleVisibilityChange() {
-      setPageVisible(document.visibilityState === 'visible');
-    }
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
+    const main = mainRef.current;
+    if (!main || !('IntersectionObserver' in window) ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const observeRevealElements = (node: ParentNode) => {
+      if (node instanceof Element && node.matches('[data-scroll-reveal]')) {
+        observer.observe(node);
+      }
+      node.querySelectorAll?.('[data-scroll-reveal]').forEach((element) => observer.observe(element));
+    };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const element = entry.target as HTMLElement;
+        const revealSiblings = Array.from(element.parentElement?.children ?? [])
+          .filter((sibling) => sibling.hasAttribute('data-scroll-reveal'));
+        const siblingIndex = revealSiblings.indexOf(element);
+        element.style.setProperty('--reveal-delay', `${Math.min(siblingIndex, 2) * 75}ms`);
+        element.dataset.revealed = 'true';
+        observer.unobserve(element);
+      });
+    }, { threshold: 0, rootMargin: '0px 0px -36px 0px' });
+    const mutations = new MutationObserver((records) => {
+      records.forEach((record) => {
+        record.addedNodes.forEach((node) => {
+          if (node instanceof Element) observeRevealElements(node);
+        });
+      });
+    });
+
+    document.documentElement.dataset.scrollReveal = 'true';
+    observeRevealElements(main);
+    mutations.observe(main, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      mutations.disconnect();
+      delete document.documentElement.dataset.scrollReveal;
+    };
+  }, [router.asPath]);
   const navigation = [
     { href: '/', label: 'Beranda' },
     { href: '/prayer', label: 'Jadwal salat' },
@@ -90,8 +124,8 @@ function AppLayout({ Component, pageProps }: Pick<AppProps, 'Component' | 'pageP
         </div>
       </header>
       {logoutError && <p className="global-account-error" role="alert">{logoutError}</p>}
-      <main className="main-content">
-        <div className={`page-transition${pageVisible ? ' page-transition-active' : ''}`} key={router.asPath}>
+      <main className="main-content" ref={mainRef}>
+        <div key={router.asPath}>
           <Component {...pageProps} />
         </div>
       </main>

@@ -63,7 +63,7 @@ export default function BookmarksPage() {
 
   if (!user) {
     return (
-      <section className="bookmarks-page">
+      <section className="bookmarks-page" data-scroll-reveal>
         <div className="bookmarks-hero">
           <p className="eyebrow">Simpan bacaan pilihan</p>
           <h1>Bookmark</h1>
@@ -75,14 +75,14 @@ export default function BookmarksPage() {
   }
 
   return (
-    <section className="bookmarks-page">
+    <section className="bookmarks-page" data-scroll-reveal>
       <header className="bookmarks-hero">
         <p className="eyebrow">Koleksi pribadimu</p>
         <h1>Bookmark</h1>
         <p>Bookmark terpisah dari bacaan terakhir. Atur ayat dan doa dalam kategori bawaan atau kategori buatanmu.</p>
       </header>
 
-      <section className="bookmark-category-manager" aria-labelledby="bookmark-category-title">
+      <section className="bookmark-category-manager" aria-labelledby="bookmark-category-title" data-scroll-reveal>
         <div>
           <p className="eyebrow">Atur koleksi</p>
           <h2 id="bookmark-category-title">Kategori bookmark</h2>
@@ -134,7 +134,7 @@ export default function BookmarksPage() {
       )}
       {message && <p className="success-message" role="status">{message}</p>}
 
-      <section className="bookmark-items-section" aria-labelledby="bookmark-items-title">
+      <section className="bookmark-items-section" aria-labelledby="bookmark-items-title" data-scroll-reveal>
         <div className="bookmark-items-heading">
           <h2 id="bookmark-items-title">
             {selectedCategoryId === 'all'
@@ -160,7 +160,7 @@ export default function BookmarksPage() {
                   ? `/doa/${bookmark.duaId}`
                   : '/doa';
               return (
-                <article className="bookmark-item" key={bookmark.id}>
+                <article className="bookmark-item" data-scroll-reveal key={bookmark.id}>
                   <Link href={href}>
                     <span className="bookmark-item-category">{bookmark.categoryName}</span>
                     <strong>{bookmark.title}</strong>

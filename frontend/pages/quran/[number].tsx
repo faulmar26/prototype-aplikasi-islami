@@ -200,7 +200,7 @@ export default function SurahReadingPage() {
 
   return (
     <div className="quran-reading-page">
-      <nav className="quran-reader-toolbar" aria-label="Navigasi bacaan">
+      <nav className="quran-reader-toolbar" aria-label="Navigasi bacaan" data-scroll-reveal>
         <Link className="reader-list-link" href="/quran"><span aria-hidden="true">▦</span> Daftar Surah</Link>
         <div className="reader-selectors">
           <label className="reader-select-wrap">
@@ -250,7 +250,7 @@ export default function SurahReadingPage() {
 
       {surah && reading && (
         <main className="surah-reader" ref={readerRef}>
-          <header className="surah-reader-heading">
+          <header className="surah-reader-heading" data-scroll-reveal>
             <p className="eyebrow">
               Surah {surah.revelationType === 'Meccan' ? 'Makkiyah' : 'Madaniyah'} · {reading.arabicAyahs.length} ayat
             </p>
@@ -309,7 +309,7 @@ export default function SurahReadingPage() {
               const transliteration = reading.transliterationAyahs[index];
               const translation = reading.translatedAyahs[index];
               return (
-                <article className="reader-ayah" id={`ayah-${ayah.numberInSurah}`} key={ayah.numberInSurah}>
+                <article className="reader-ayah" data-scroll-reveal id={`ayah-${ayah.numberInSurah}`} key={ayah.numberInSurah}>
                   <div className="reader-ayah-meta">
                     <span className="reader-ayah-badge">{ayah.numberInSurah}</span>
                     {user && (
