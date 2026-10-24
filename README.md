@@ -48,9 +48,9 @@ Gunakan tombol tema di header untuk berpindah antara **Terang** dan **Gelap**. P
 
 - **Frontend:** Next.js, React, TypeScript, CSS.
 - **Backend:** NestJS, TypeScript, JWT, `class-validator`.
-- **Database:** MySQL-compatible.
+- **Database:** MySQL-compatible, termasuk Aiven MySQL.
 - **Data eksternal:** AlQuran Cloud API untuk katalog dan bacaan Al-Qur’an; Aladhan API untuk jadwal salat.
-- **Hosting frontend:** Vercel.
+- **Hosting:** frontend di Vercel, backend di Railway atau Render.
 
 ## Menjalankan secara lokal
 
@@ -83,6 +83,7 @@ Isi variabel berikut tanpa menyimpan rahasia ke Git:
 
 ```dotenv
 PORT=3001
+NODE_ENV=development
 FRONTEND_ORIGIN=http://localhost:3000
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -91,14 +92,19 @@ DB_PASSWORD=<kata-sandi-database>
 DB_NAME=islami_app
 DB_SSL=false
 DB_SSL_CA=./certs/ca.pem
+DB_CONNECTION_LIMIT=10
 JWT_SECRET=<rahasia-acak-minimal-32-karakter>
+COOKIE_SAMESITE=lax
+COOKIE_SECURE=false
 ```
 
 Untuk database Aiven atau layanan lain yang memerlukan TLS:
 
 - Atur `DB_SSL=true`.
-- Unduh CA certificate dari penyedia database dan simpan sebagai `backend/certs/ca.pem`.
-- Pastikan `DB_SSL_CA=./certs/ca.pem`. Backend memvalidasi sertifikat; jangan mematikan verifikasi TLS.
+- Unduh CA certificate dari penyedia database. `DB_SSL_CA` menerima path file, isi PEM, atau `base64:<isi-base64>`.
+- Contoh lokal: simpan sebagai `backend/certs/ca.pem` dan atur `DB_SSL_CA=./certs/ca.pem`.
+- Contoh hosting: atur `DB_SSL_CA=base64:<hasil base64 ca.pem>` agar tidak perlu mengunggah file.
+- Backend memvalidasi sertifikat; jangan mematikan verifikasi TLS.
 - Isi `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, dan `DB_NAME` menggunakan kredensial privat database.
 
 `backend/.env` dan `backend/certs/ca.pem` diabaikan Git. Jangan membagikan atau melakukan commit kata sandi, JWT secret, atau sertifikat privat.
@@ -125,19 +131,80 @@ npm run dev
 
 Buka [http://localhost:3000](http://localhost:3000). Backend berjalan pada `http://localhost:3001` dan harus berhasil terhubung ke database sebelum API akun siap.
 
-Jika alamat API bukan `http://localhost:3001`, atur `NEXT_PUBLIC_API_URL` pada environment frontend, contohnya `http://localhost:3001`, lalu jalankan ulang frontend. Nilai variabel `NEXT_PUBLIC_*` dibundel saat frontend dibangun.
+Frontend mem-proxy `/api` ke backend melalui `BACKEND_URL` (default `http://127.0.0.1:3001`), sehingga tidak perlu mengatur `NEXT_PUBLIC_API_URL` untuk pengembangan lokal. Jika alamat backend berbeda, salin `frontend/.env.example` ke `frontend/.env.local`, atur `BACKEND_URL`, lalu jalankan ulang frontend.
 
 ## Konfigurasi deployment
 
-Frontend tersedia di [https://prototype-aplikasi-islami.vercel.app/](https://prototype-aplikasi-islami.vercel.app/).
+Arsitektur yang dipakai:
 
-Untuk mengaktifkan login/registrasi dan penyimpanan progres pada deployment:
+- **Frontend** di Vercel.
+- **Backend** di Railway atau Render sebagai proses Node biasa.
+- **Database** MySQL Aiven.
+- Browser memanggil `/api/*` pada domain frontend, lalu Vercel meneruskannya ke backend. Dengan proxy ini cookie sesi tetap first-party dan CORS tidak diperlukan.
 
-1. Deploy backend NestJS ke layanan yang dapat diakses melalui HTTPS.
-2. Siapkan database MySQL dan jalankan skema atau migrasi yang sesuai.
-3. Atur environment backend (`DB_*`, `DB_SSL`, `DB_SSL_CA`, `JWT_SECRET`, dan `FRONTEND_ORIGIN`) pada hosting backend. Gunakan `FRONTEND_ORIGIN=https://prototype-aplikasi-islami.vercel.app`.
-4. Atur `NEXT_PUBLIC_API_URL` pada Vercel ke origin backend, tanpa akhiran `/api`, lalu deploy ulang frontend.
-5. Pastikan koneksi jaringan database mengizinkan backend dan sertifikat TLS provider terpasang dengan benar.
+### 1. Siapkan database Aiven
+
+1. Buat layanan MySQL di Aiven, lalu catat host, port, user, password, dan nama database (`defaultdb`).
+2. Unduh CA certificate dari halaman koneksi Aiven.
+3. Jalankan [`database/schema.sql`](database/schema.sql) pada database tersebut (`DB_NAME=defaultdb` untuk database bawaan Aiven). Contoh:
+
+   ```bash
+   mysql --host=<host> --port=<port> --user=<user> --password \
+     --ssl-mode=VERIFY_CA --ssl-ca=ca.pem defaultdb < database/schema.sql
+   ```
+
+   Skema memuat tabel akun, progres, bookmark, dan seed misi harian. Jangan jalankan ulang pada database yang sudah berisi tabel; untuk skema lama gunakan migrasi di `database/migrations/`.
+4. Simpan CA certificate untuk environment backend.
+
+### 2. Deploy backend ke Railway
+
+1. Buat project Railway dari repository ini dan set **Root Directory** ke `backend`.
+2. Railway membaca [`backend/railway.json`](backend/railway.json): build `npm ci --include=dev && npm run build`, start `npm run start:prod`, health check `/api`.
+3. Atur environment berikut:
+
+   | Variabel | Nilai |
+   |---|---|
+   | `NODE_ENV` | `production` |
+   | `FRONTEND_ORIGIN` | `https://<domain-vercel>` |
+   | `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | kredensial Aiven |
+   | `DB_SSL` | `true` |
+   | `DB_SSL_CA` | `base64:<isi-base64 ca.pem>` atau isi PEM |
+   | `DB_CONNECTION_LIMIT` | `5` |
+   | `JWT_SECRET` | rahasia acak minimal 32 karakter |
+   | `COOKIE_SAMESITE` | `lax` untuk mode proxy |
+   | `COOKIE_SECURE` | `true` |
+
+   `PORT` diisi otomatis oleh Railway. Untuk membuat nilai base64 CA di PowerShell:
+
+   ```powershell
+   [Convert]::ToBase64String([IO.File]::ReadAllBytes("ca.pem"))
+   ```
+
+   Lalu set `DB_SSL_CA=base64:<hasil-perintah-di-atas>`.
+
+4. Deploy, lalu pastikan `https://<domain-backend>/api` mengembalikan teks `Backend Aplikasi Islami berjalan`.
+5. Untuk Render, gunakan [`render.yaml`](render.yaml) sebagai Blueprint; isi environment rahasia saat diminta.
+
+### 3. Deploy frontend ke Vercel
+
+1. Import repository ini di Vercel dan set **Root Directory** ke `frontend`.
+2. Tambahkan environment `BACKEND_URL=https://<domain-backend>` (tanpa akhiran `/api`).
+3. Deploy. Biarkan `NEXT_PUBLIC_API_URL` kosong agar frontend memakai proxy `/api`. Jika domain backend berubah, perbarui `BACKEND_URL` lalu redeploy frontend karena rewrite dibaca saat build.
+4. Setelah domain Vercel diketahui, perbarui `FRONTEND_ORIGIN` di backend dan redeploy backend.
+
+### 4. Verifikasi
+
+- Buka situs, daftar akun, lalu refresh halaman untuk memastikan sesi tetap masuk.
+- Simpan bookmark, buka surah/doa, dan cek progres pada beranda.
+- Jika login gagal, periksa `FRONTEND_ORIGIN`, atribut cookie, dan CA certificate Aiven.
+
+### Catatan produksi
+
+- Jangan commit `.env`, password database, JWT secret, atau CA certificate. Simpan semuanya di dashboard hosting.
+- Gunakan `JWT_SECRET` produksi yang berbeda dari lokal.
+- Kecilkan `DB_CONNECTION_LIMIT` (misalnya `5`) agar tidak melewati batas koneksi Aiven.
+- Mode proxy adalah pilihan yang disarankan. Jika frontend memanggil backend secara langsung, set `COOKIE_SAMESITE=none`, `COOKIE_SECURE=true`, dan pastikan `FRONTEND_ORIGIN` cocok; sebagian browser tetap dapat memblokir cookie pihak ketiga.
+- `FRONTEND_ORIGIN` menerima beberapa origin dipisahkan koma, misalnya domain produksi dan preview Vercel. Tulis origin secara lengkap dengan `https://` dan tanpa garis miring di akhir.
 
 Tautan frontend saja tidak mengaktifkan layanan akun apabila backend atau database belum dideploy dan dikonfigurasi.
 

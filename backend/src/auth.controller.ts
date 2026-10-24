@@ -44,19 +44,22 @@ export class AuthController {
 
   @Post('logout')
   logout(@Res({ passthrough: true }) response: Response) {
-    const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-    response.setHeader(
-      'Set-Cookie',
-      `${SESSION_COOKIE}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secure}`,
-    );
+    response.setHeader('Set-Cookie', `${SESSION_COOKIE}=; ${this.cookieAttributes(0)}`);
     return { success: true };
   }
 
   private setSession(response: Response, token: string) {
-    const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
     response.setHeader(
       'Set-Cookie',
-      `${SESSION_COOKIE}=${encodeURIComponent(token)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${COOKIE_MAX_AGE / 1000}${secure}`,
+      `${SESSION_COOKIE}=${encodeURIComponent(token)}; ${this.cookieAttributes(COOKIE_MAX_AGE / 1000)}`,
     );
+  }
+
+  private cookieAttributes(maxAgeSeconds: number) {
+    const sameSite = process.env.COOKIE_SAMESITE?.toLowerCase() === 'none' ? 'None' : 'Lax';
+    const secure = process.env.NODE_ENV === 'production' || process.env.COOKIE_SECURE === 'true';
+    const attributes = ['HttpOnly', 'Path=/', `SameSite=${sameSite}`, `Max-Age=${maxAgeSeconds}`];
+    if (secure) attributes.push('Secure');
+    return attributes.join('; ');
   }
 }

@@ -8,9 +8,13 @@
     "build": "nest build",
     "start": "nest start",
     "start:dev": "nest start --watch",
+    "start:prod": "node dist/main.js",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "test": "echo \"No test specified\""
+  },
+  "engines": {
+    "node": ">=20"
   },
   "keywords": [
     "nestjs",

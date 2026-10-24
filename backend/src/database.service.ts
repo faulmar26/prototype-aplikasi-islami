@@ -15,13 +15,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         rejectUnauthorized: true,
       }
       : undefined;
+    const connectionLimit = Number(process.env.DB_CONNECTION_LIMIT ?? 10);
     this.pool = createPool({
       host: process.env.DB_HOST ?? '127.0.0.1',
       port: Number(process.env.DB_PORT ?? 3306),
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME ?? 'islami_app',
-      connectionLimit: 10,
+      connectionLimit: Number.isInteger(connectionLimit) && connectionLimit > 0 ? connectionLimit : 10,
       waitForConnections: true,
       queueLimit: 0,
       timezone: 'Z',
@@ -50,14 +51,26 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   private readDatabaseCertificate() {
-    const certificatePath = process.env.DB_SSL_CA;
-    if (!certificatePath) {
-      throw new Error('DB_SSL_CA harus menunjuk ke sertifikat CA database saat DB_SSL=true.');
+    const certificate = process.env.DB_SSL_CA?.trim();
+    if (!certificate) {
+      throw new Error('DB_SSL_CA harus berisi sertifikat CA database saat DB_SSL=true.');
+    }
+    if (certificate.startsWith('base64:')) {
+      const decoded = Buffer.from(certificate.slice('base64:'.length), 'base64')
+        .toString('utf8')
+        .trim();
+      if (!decoded.includes('BEGIN CERTIFICATE')) {
+        throw new Error('DB_SSL_CA berisi data base64 yang bukan sertifikat PEM.');
+      }
+      return decoded;
+    }
+    if (certificate.includes('BEGIN CERTIFICATE')) {
+      return certificate.replace(/\\n/g, '\n');
     }
     try {
-      return readFileSync(resolve(__dirname, '..', certificatePath));
+      return readFileSync(resolve(__dirname, '..', certificate));
     } catch {
-      throw new Error(`Sertifikat CA database tidak dapat dibaca dari "${certificatePath}".`);
+      throw new Error(`Sertifikat CA database tidak dapat dibaca dari "${certificate}".`);
     }
   }
 
