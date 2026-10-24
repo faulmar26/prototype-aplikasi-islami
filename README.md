@@ -50,7 +50,7 @@ Gunakan tombol tema di header untuk berpindah antara **Terang** dan **Gelap**. P
 - **Backend:** NestJS, TypeScript, JWT, `class-validator`.
 - **Database:** MySQL-compatible, termasuk Aiven MySQL.
 - **Data eksternal:** AlQuran Cloud API untuk katalog dan bacaan Al-Qur’an; Aladhan API untuk jadwal salat.
-- **Hosting:** frontend di Vercel, backend di Railway atau Render.
+- **Hosting:** frontend dan backend di Vercel, database MySQL di Aiven.
 
 ## Menjalankan secara lokal
 
@@ -137,8 +137,8 @@ Frontend mem-proxy `/api` ke backend melalui `BACKEND_URL` (default `http://127.
 
 Arsitektur yang dipakai:
 
-- **Frontend** di Vercel.
-- **Backend** di Railway atau Render sebagai proses Node biasa.
+- **Frontend** di Vercel (Next.js).
+- **Backend** di Vercel (NestJS, zero configuration).
 - **Database** MySQL Aiven.
 - Browser memanggil `/api/*` pada domain frontend, lalu Vercel meneruskannya ke backend. Dengan proxy ini cookie sesi tetap first-party dan CORS tidak diperlukan.
 
@@ -156,25 +156,26 @@ Arsitektur yang dipakai:
    Skema memuat tabel akun, progres, bookmark, dan seed misi harian. Jangan jalankan ulang pada database yang sudah berisi tabel; untuk skema lama gunakan migrasi di `database/migrations/`.
 4. Simpan CA certificate untuk environment backend.
 
-### 2. Deploy backend ke Railway
+### 2. Deploy backend ke Vercel
 
-1. Buat project Railway dari repository ini dan set **Root Directory** ke `backend`.
-2. Railway membaca [`backend/railway.json`](backend/railway.json): build `npm ci --include=dev && npm run build`, start `npm run start:prod`, health check `/api`.
-3. Atur environment berikut:
+1. Buat project Vercel dari repository ini dan set **Root Directory** ke `backend`.
+2. Pada **Settings → Build & Development**, pilih **Framework Preset: NestJS** dan biarkan Build/Output Command kosong (Vercel mendeteksinya otomatis). Vercel menjalankan aplikasi Nest sebagai satu Function.
+3. [`backend/vercel.json`](backend/vercel.json) mengatur region function `bom1` (Mumbai, terdekat dengan Aiven Bengaluru). Ubah bila database berada di region lain.
+4. Atur environment berikut:
 
    | Variabel | Nilai |
    |---|---|
    | `NODE_ENV` | `production` |
-   | `FRONTEND_ORIGIN` | `https://<domain-vercel>` |
+   | `FRONTEND_ORIGIN` | `https://<domain-vercel-frontend>` |
    | `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | kredensial Aiven |
    | `DB_SSL` | `true` |
    | `DB_SSL_CA` | `base64:<isi-base64 ca.pem>` atau isi PEM |
-   | `DB_CONNECTION_LIMIT` | `5` |
+   | `DB_CONNECTION_LIMIT` | `3` (serverless membuat beberapa instance; jaga di bawah batas Aiven) |
    | `JWT_SECRET` | rahasia acak minimal 32 karakter |
    | `COOKIE_SAMESITE` | `lax` untuk mode proxy |
    | `COOKIE_SECURE` | `true` |
 
-   `PORT` diisi otomatis oleh Railway. Untuk membuat nilai base64 CA di PowerShell:
+   `PORT` diisi otomatis oleh Vercel. Untuk membuat nilai base64 CA di PowerShell:
 
    ```powershell
    [Convert]::ToBase64String([IO.File]::ReadAllBytes("ca.pem"))
@@ -182,8 +183,8 @@ Arsitektur yang dipakai:
 
    Lalu set `DB_SSL_CA=base64:<hasil-perintah-di-atas>`.
 
-4. Deploy, lalu pastikan `https://<domain-backend>/api` mengembalikan teks `Backend Aplikasi Islami berjalan`.
-5. Untuk Render, gunakan [`render.yaml`](render.yaml) sebagai Blueprint; isi environment rahasia saat diminta.
+5. Nonaktifkan Deployment Protection (**Settings → Deployment Protection → Vercel Authentication: Disabled**) agar API bisa dipanggil dari domain frontend.
+6. Deploy, lalu pastikan `https://<domain-backend>/api` mengembalikan teks `Backend Aplikasi Islami berjalan`.
 
 ### 3. Deploy frontend ke Vercel
 

@@ -61,8 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Deploy to Railway
+      - name: Deploy
         run: |
-          echo "Deploy backend ke Railway"
-          # npx railway token
-          # npx railway depoly
+          echo "Backend dan frontend dideploy otomatis oleh Vercel dari branch main."
+          echo "Pastikan environment produksi sudah diatur di dashboard Vercel."
